@@ -43,6 +43,16 @@ where
     deserializer.end().map(move |_| t)
 }
 
+//custom implementation which allows for a remainder of bytes to be returned
+pub fn from_bytes_with_remainder<'a, T>(bytes: &'a [u8]) -> Result<(T, &'a [u8])>
+where
+    T: Deserialize<'a>,
+{
+    let mut deserializer = Deserializer::new(bytes, crate::MAX_CONTAINER_DEPTH);
+    let t = T::deserialize(&mut deserializer)?;
+    Ok((t, deserializer.input))
+}
+
 /// Perform a stateful deserialization from a `&[u8]` using the provided `seed`.
 pub fn from_bytes_seed<'a, T>(seed: T, bytes: &'a [u8]) -> Result<T::Value>
 where
