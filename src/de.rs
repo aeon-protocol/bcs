@@ -44,13 +44,14 @@ where
 }
 
 //custom implementation which allows for a remainder of bytes to be returned
-pub fn from_bytes_with_remainder<'a, T>(bytes: &'a [u8]) -> Result<(T, &'a [u8])>
+pub fn peel_bytes<'a, T>(bytes: &mut &'a [u8]) -> Result<T>
 where
     T: Deserialize<'a>,
 {
     let mut deserializer = Deserializer::new(bytes, crate::MAX_CONTAINER_DEPTH);
     let t = T::deserialize(&mut deserializer)?;
-    Ok((t, deserializer.input))
+    *bytes = deserializer.input;
+    Ok(t)
 }
 
 /// Perform a stateful deserialization from a `&[u8]` using the provided `seed`.
